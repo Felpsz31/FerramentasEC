@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulador de LED & Resistor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .led-glow {
+      transition: all 0.15s ease-out;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8 font-sans flex flex-col items-center">
+
+  <!-- Botão de retorno à raiz -->
+  <div class="w-full max-w-2xl mb-4">
+    <a href="../../index.html" class="text-sky-400 hover:text-sky-300 transition-colors text-sm font-medium inline-flex items-center gap-1">
+      ← Voltar ao Hub Principal
+    </a>
+  </div>
+
+  <main class="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 shadow-xl">
+    <header class="mb-6">
+      <span class="text-xs font-semibold px-2.5 py-1 bg-sky-950 text-sky-400 border border-sky-800 rounded-md">
+        Eletrônica Básica
+      </span>
+      <h1 class="text-2xl font-bold mt-2 text-white">Simulador de Circuito: Fonte + Resistor + LED</h1>
+      <p class="text-sm text-slate-400 mt-1">
+        Ajuste a tensão da fonte e o resistor em série para observar a corrente e o estado do diodo emissor de luz.
+      </p>
+    </header>
+
+    <!-- Visualizador do LED -->
+    <div class="flex flex-col items-center justify-center p-8 bg-slate-950/70 border border-slate-800/80 rounded-xl mb-6">
+      <div class="relative flex items-center justify-center">
+        <!-- Brilho externo (Glow) -->
+        <div id="led-halo" class="absolute w-24 h-24 rounded-full opacity-0 filter blur-xl transition-all duration-200"></div>
+        <!-- Corpo do LED -->
+        <div id="led-bulb" class="led-glow w-14 h-14 rounded-full border-2 border-slate-700 bg-slate-800 flex items-center justify-center shadow-inner relative z-10">
+          <span id="led-icon" class="text-lg opacity-40">💡</span>
+        </div>
+      </div>
+      <span id="led-status" class="mt-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
+        Desligado (Sub-tensão)
+      </span>
+    </div>
+
+    <!-- Controles interativos -->
+    <div class="space-y-5">
+      <!-- Slider Tensão -->
+      <div>
+        <div class="flex justify-between text-sm font-medium mb-1">
+          <label for="voltage" class="text-slate-300">Tensão da Fonte (V)</label>
+          <span id="voltage-val" class="text-sky-400 font-mono">5.0 V</span>
+        </div>
+        <input id="voltage" type="range" min="0" max="15" step="0.1" value="5" 
+               class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-sky-500" />
+      </div>
+
+      <!-- Slider Resistor -->
+      <div>
+        <div class="flex justify-between text-sm font-medium mb-1">
+          <label for="resistor" class="text-slate-300">Resistor em Série (R)</label>
+          <span id="resistor-val" class="text-sky-400 font-mono">220 Ω</span>
+        </div>
+        <input id="resistor" type="range" min="10" max="1000" step="10" value="220" 
+               class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-sky-500" />
+      </div>
+
+      <!-- Seletor de Cor do LED -->
+      <div>
+        <label class="block text-sm font-medium text-slate-300 mb-2">Tipo de LED (V aproximado)</label>
+        <div class="grid grid-cols-3 gap-3">
+          <button type="button" data-color="red" data-vf="2.0" class="color-btn py-2 px-3 text-xs font-semibold rounded-lg border border-red-500/40 bg-red-500/10 text-red-400 hover:bg-red-500/20 active:scale-95 transition-all">
+            Vermelho (2.0V)
+          </button>
+          <button type="button" data-color="green" data-vf="2.2" class="color-btn py-2 px-3 text-xs font-semibold rounded-lg border border-slate-700 bg-slate-800/40 text-slate-400 hover:bg-slate-800 active:scale-95 transition-all">
+            Verde (2.2V)
+          </button>
+          <button type="button" data-color="blue" data-vf="3.2" class="color-btn py-2 px-3 text-xs font-semibold rounded-lg border border-slate-700 bg-slate-800/40 text-slate-400 hover:bg-slate-800 active:scale-95 transition-all">
+            Azul (3.2V)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Métricas do circuito -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-6 pt-6 border-t border-slate-800 text-center font-mono">
+      <div class="bg-slate-950 p-3 rounded-lg border border-slate-800/60">
+        <span class="block text-xs text-slate-500">Corrente (I)</span>
+        <span id="metric-current" class="text-base font-bold text-white">0.0 mA</span>
+      </div>
+      <div class="bg-slate-950 p-3 rounded-lg border border-slate-800/60">
+        <span class="block text-xs text-slate-500">Queda no Resistor</span>
+        <span id="metric-vr" class="text-base font-bold text-white">0.0 V</span>
+      </div>
+      <div class="col-span-2 sm:col-span-1 bg-slate-950 p-3 rounded-lg border border-slate-800/60">
+        <span class="block text-xs text-slate-500">Potência no LED</span>
+        <span id="metric-power" class="text-base font-bold text-white">0.0 mW</span>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const voltageInput = document.getElementById('voltage');
+    const resistorInput = document.getElementById('resistor');
+    const voltageVal = document.getElementById('voltage-val');
+    const resistorVal = document.getElementById('resistor-val');
+    const metricCurrent = document.getElementById('metric-current');
+    const metricVr = document.getElementById('metric-vr');
+    const metricPower = document.getElementById('metric-power');
+    const ledBulb = document.getElementById('led-bulb');
+    const ledHalo = document.getElementById('led-halo');
+    const ledStatus = document.getElementById('led-status');
+    const colorBtns = document.querySelectorAll('.color-btn');
+
+    let currentVf = 2.0;
+    let currentColor = 'red';
+
+    const colorConfig = {
+      red: { hex: '#ef4444', halo: 'rgba(239, 68, 68, 0.6)' },
+      green: { hex: '#22c55e', halo: 'rgba(34, 197, 94, 0.6)' },
+      blue: { hex: '#3b82f6', halo: 'rgba(59, 130, 246, 0.6)' }
+    };
+
+    colorBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentVf = parseFloat(btn.dataset.vf);
+        currentColor = btn.dataset.color;
+
+        colorBtns.forEach(b => {
+          b.className = 'color-btn py-2 px-3 text-xs font-semibold rounded-lg border border-slate-700 bg-slate-800/40 text-slate-400 hover:bg-slate-800 active:scale-95 transition-all';
+        });
+
+        btn.className = `color-btn py-2 px-3 text-xs font-semibold rounded-lg border border-${currentColor === 'red' ? 'red' : currentColor === 'green' ? 'emerald' : 'blue'}-500/40 bg-${currentColor === 'red' ? 'red' : currentColor === 'green' ? 'emerald' : 'blue'}-500/10 text-${currentColor === 'red' ? 'red' : currentColor === 'green' ? 'emerald' : 'blue'}-400 active:scale-95 transition-all`;
+
+        updateCircuit();
+      });
+    });
+
+    function updateCircuit() {
+      const vcc = parseFloat(voltageInput.value);
+      const r = parseFloat(resistorInput.value);
+
+      voltageVal.textContent = `${vcc.toFixed(1)} V`;
+      resistorVal.textContent = `${r} Ω`;
+
+      let current_mA = 0;
+      let vr = 0;
+      let power_mW = 0;
+
+      if (vcc > currentVf) {
+        vr = vcc - currentVf;
+        const current_A = vr / r;
+        current_mA = current_A * 1000;
+        power_mW = currentVf * current_mA;
+      }
+
+      metricCurrent.textContent = `${current_mA.toFixed(1)} mA`;
+      metricVr.textContent = `${vr.toFixed(2)} V`;
+      metricPower.textContent = `${power_mW.toFixed(1)} mW`;
+
+      const cfg = colorConfig[currentColor];
+
+      // Estados do LED
+      if (current_mA <= 0) {
+        // Desligado
+        ledBulb.style.backgroundColor = '#1e293b';
+        ledBulb.style.boxShadow = 'none';
+        ledHalo.style.opacity = '0';
+        ledStatus.textContent = 'Desligado (Tensão insuficiente)';
+        ledStatus.className = 'mt-4 text-xs font-semibold uppercase tracking-wider text-slate-500';
+      } else if (current_mA > 40) {
+        // Queimado por sobrecorrente
+        ledBulb.style.backgroundColor = '#0f172a';
+        ledBulb.style.boxShadow = '0 0 10px rgba(0,0,0,0.8)';
+        ledHalo.style.opacity = '0';
+        ledStatus.textContent = '💥 LED Queimado! (Corrente > 40mA)';
+        ledStatus.className = 'mt-4 text-xs font-semibold uppercase tracking-wider text-red-500 font-bold';
+      } else {
+        // Operando normalmente (brilho proporcional até ~20mA)
+        const intensity = Math.min(current_mA / 20, 1.2);
+        ledBulb.style.backgroundColor = cfg.hex;
+        ledBulb.style.boxShadow = `0 0 ${15 * intensity}px ${cfg.hex}`;
+        ledHalo.style.backgroundColor = cfg.halo;
+        ledHalo.style.opacity = `${Math.min(intensity * 0.75, 0.9)}`;
+        
+        if (current_mA > 25) {
+          ledStatus.textContent = 'Atenção: Sobrecarga leve (> 25mA)';
+          ledStatus.className = 'mt-4 text-xs font-semibold uppercase tracking-wider text-amber-400';
+        } else {
+          ledStatus.textContent = 'Ligado (Operação Ideal)';
+          ledStatus.className = 'mt-4 text-xs font-semibold uppercase tracking-wider text-emerald-400';
+        }
+      }
+    }
+
+    voltageInput.addEventListener('input', updateCircuit);
+    resistorInput.addEventListener('input', updateCircuit);
+    updateCircuit();
+  </script>
+</body>
+</html>
