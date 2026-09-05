@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Mapa de Karnaugh</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        kmap: {
+                            base: '#030712',
+                            surface: '#0b1329',
+                            card: '#111c38',
+                            border: '#1e293b',
+                            accent: '#38bdf8'
+                        }
+                    },
+                    fontFamily: {
+                        mono: ['JetBrains Mono', 'Fira Code', 'Courier New', 'monospace'],
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0b1329;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+
+        .kcell-glow-1 {
+            box-shadow: inset 0 0 12px rgba(56, 189, 248, 0.25);
+        }
+        .kcell-glow-x {
+            box-shadow: inset 0 0 12px rgba(245, 158, 11, 0.25);
+        }
+        .term-highlight {
+            animation: pulseHighlight 1.2s infinite alternate;
+        }
+        @keyframes pulseHighlight {
+            0% { transform: scale(1); filter: brightness(1); }
+            100% { transform: scale(1.03); filter: brightness(1.25); }
+        }
+    </style>
+</head>
+<body class="bg-kmap-base text-slate-100 min-h-screen p-3 sm:p-6 font-sans selection:bg-sky-500 selection:text-slate-950 flex flex-col items-center">
+
+    <!-- Botão de retorno à raiz -->
+    <div class="w-full max-w-6xl mb-4">
+        <a href="../../index.html" class="text-sky-400 hover:text-sky-300 transition-colors text-sm font-medium inline-flex items-center gap-1">
+            ← Voltar ao Hub Principal
+        </a>
+    </div>
+
+    <header class="w-full max-w-6xl mb-5 flex flex-col md:flex-row items-center justify-between gap-4 pb-4 border-b border-kmap-border">
+        <div>
+            <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/30 mb-1">
+                <i class="fa-solid fa-microchip"></i> Minimização Booleana SOP
+            </div>
+            <h1 class="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2">
+                Simulador e Minimizador de Mapa de Karnaugh
+            </h1>
+        </div>
+
+        <div class="flex items-center gap-2 bg-kmap-surface p-1.5 rounded-2xl border border-kmap-border shadow-xl">
+            <span class="text-[11px] font-mono text-slate-400 uppercase px-2 font-bold hidden sm:inline">Variáveis:</span>
+            <button id="btnVar2" onclick="setVariableCount(2)" class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-1 text-slate-300 hover:text-white">
+                2 Vars <small class="text-[10px] opacity-75">(A, B)</small>
+            </button>
+            <button id="btnVar3" onclick="setVariableCount(3)" class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-1 text-slate-300 hover:text-white">
+                3 Vars <small class="text-[10px] opacity-75">(A, B, C)</small>
+            </button>
+            <button id="btnVar4" onclick="setVariableCount(4)" class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-1 bg-sky-500 text-slate-950 shadow-md">
+                4 Vars <small class="text-[10px] opacity-75">(A, B, C, D)</small>
+            </button>
+        </div>
+    </header>
+
+    <main class="w-full max-w-6xl flex flex-col gap-5">
+        <section class="bg-kmap-surface border border-kmap-border rounded-2xl p-4 shadow-xl flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-mono text-slate-400">Ciclo de clique na célula:</span>
+                <span class="px-2 py-0.5 rounded text-xs font-mono font-bold bg-slate-800 text-slate-400 border border-slate-700">0</span>
+                <i class="fa-solid fa-arrow-right text-[10px] text-slate-500"></i>
+                <span class="px-2 py-0.5 rounded text-xs font-mono font-bold bg-sky-500/20 text-sky-300 border border-sky-500/40">1</span>
+                <i class="fa-solid fa-arrow-right text-[10px] text-slate-500"></i>
+                <span class="px-2 py-0.5 rounded text-xs font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">X</span>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button onclick="fillAllCells('0')" class="px-3 py-1.5 rounded-xl text-xs font-mono font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 transition flex items-center gap-1.5 border border-slate-700">
+                    <i class="fa-solid fa-rotate-left text-[11px]"></i> Zerar Tudo
+                </button>
+                <button onclick="fillAllCells('1')" class="px-3 py-1.5 rounded-xl text-xs font-mono font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 transition flex items-center gap-1.5 border border-slate-700">
+                    <i class="fa-solid fa-check-double text-[11px]"></i> Preencher com 1s
+                </button>
+                <button onclick="fillRandomExample()" class="px-3 py-1.5 rounded-xl text-xs font-mono font-bold bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 transition flex items-center gap-1.5 border border-sky-500/30">
+                    <i class="fa-solid fa-dice text-[11px]"></i> Exemplo Aleatório
+                </button>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+            <section class="lg:col-span-7 flex flex-col gap-4">
+                <div class="bg-kmap-surface border border-kmap-border rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col gap-4">
+                    <div class="flex items-center justify-between border-b border-kmap-border/70 pb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-sky-400"></span>
+                            <span class="text-xs font-bold tracking-wider text-slate-300 font-mono uppercase" id="gridTitle">
+                                Grade do Mapa de Karnaugh (4 Variáveis)
+                            </span>
+                        </div>
+                        <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/30">
+                            Código Gray (00, 01, 11, 10)
+                        </span>
+                    </div>
+
+                    <div class="w-full overflow-x-auto flex justify-center py-2 select-none">
+                        <div id="kmapContainer" class="inline-block"></div>
+                    </div>
+
+                    <div id="groupsLegendContainer" class="border-t border-kmap-border/70 pt-3 flex flex-col gap-2">
+                        <span class="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-bold">
+                            Agrupamentos Identificados:
+                        </span>
+                        <div id="groupsLegendList" class="flex flex-wrap gap-2"></div>
+                    </div>
+                </div>
+
+                <div class="bg-kmap-surface border border-kmap-border rounded-2xl p-4 sm:p-5 shadow-xl flex flex-col gap-3">
+                    <div class="flex items-center justify-between border-b border-kmap-border/70 pb-2">
+                        <span class="text-xs font-bold uppercase tracking-wider text-emerald-400 font-mono flex items-center gap-1.5">
+                            <i class="fa-solid fa-square-root-variable"></i> Expressão Booleana Simplificada (SOP)
+                        </span>
+                        <button onclick="copyExpressionToClipboard()" class="text-xs font-mono px-2.5 py-1 rounded-lg bg-kmap-card hover:bg-slate-800 text-slate-300 border border-kmap-border transition flex items-center gap-1">
+                            <i class="fa-regular fa-copy"></i> Copiar
+                        </button>
+                    </div>
+
+                    <div class="p-4 rounded-xl bg-slate-950 border border-slate-800/80 flex items-center justify-between">
+                        <span class="text-base sm:text-xl font-black font-mono text-sky-400 tracking-wide break-all" id="minimizedSopExpression">
+                            F = 0
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2 text-xs font-mono pt-1">
+                        <div class="bg-kmap-card p-2 rounded-xl border border-kmap-border text-center">
+                            <span class="text-slate-400 block text-[10px]">TERMOS</span>
+                            <strong id="statTermCount" class="text-white text-sm">0</strong>
+                        </div>
+                        <div class="bg-kmap-card p-2 rounded-xl border border-kmap-border text-center">
+                            <span class="text-slate-400 block text-[10px]">LITERAIS</span>
+                            <strong id="statLiteralCount" class="text-white text-sm">0</strong>
+                        </div>
+                        <div class="bg-kmap-card p-2 rounded-xl border border-kmap-border text-center">
+                            <span class="text-slate-400 block text-[10px]">1s COBERTOS</span>
+                            <strong id="statOnesCount" class="text-white text-sm">0</strong>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="lg:col-span-5 bg-kmap-surface border border-kmap-border rounded-3xl p-4 sm:p-5 shadow-2xl flex flex-col gap-3">
+                <div class="flex items-center justify-between border-b border-kmap-border/70 pb-3">
+                    <span class="text-xs font-bold uppercase tracking-wider text-sky-400 font-mono flex items-center gap-1.5">
+                        <i class="fa-solid fa-table-list"></i> Tabela-Verdade Sincronizada
+                    </span>
+                    <span class="text-[11px] font-mono text-slate-400" id="truthTableSubtitle">
+                        16 Mintermos (m0 - m15)
+                    </span>
+                </div>
+
+                <div class="overflow-y-auto max-h-[510px] custom-scrollbar border border-kmap-border rounded-xl">
+                    <table class="w-full text-left text-xs font-mono" id="truthTableElement">
+                        <thead class="bg-slate-950 sticky top-0 border-b border-kmap-border z-10 text-slate-400" id="truthTableHead"></thead>
+                        <tbody class="divide-y divide-kmap-border/50 text-slate-300" id="truthTableBody"></tbody>
+                    </table>
+                </div>
+
+                <p class="text-[11px] font-mono text-slate-400 leading-relaxed pt-1">
+                    * Clique diretamente no valor de saída (F) na tabela ou na célula correspondente no Mapa de Karnaugh para alternar o estado.
+                </p>
+            </section>
+        </div>
+    </main>
+
+    <footer class="w-full max-w-6xl mt-8 mb-4 text-center text-xs text-slate-400 border-t border-slate-800 pt-4 font-mono flex flex-col items-center justify-center gap-1">
+        <div>© Programa Embaixadores Estudantis Google 2026</div>
+        <div>Felipe Gomes</div>
+    </footer>
+
+    <script>
+        const COLOR_PALETTE = [
+            { name: 'Sky', border: 'border-sky-400', bg: 'bg-sky-500/20', text: 'text-sky-300', dot: '#38bdf8', ring: 'ring-sky-400' },
+            { name: 'Emerald', border: 'border-emerald-400', bg: 'bg-emerald-500/20', text: 'text-emerald-300', dot: '#34d399', ring: 'ring-emerald-400' },
+            { name: 'Amber', border: 'border-amber-400', bg: 'bg-amber-500/20', text: 'text-amber-300', dot: '#fbbf24', ring: 'ring-amber-400' },
+            { name: 'Purple', border: 'border-purple-400', bg: 'bg-purple-500/20', text: 'text-purple-300', dot: '#c084fc', ring: 'ring-purple-400' },
+            { name: 'Rose', border: 'border-rose-400', bg: 'bg-rose-500/20', text: 'text-rose-300', dot: '#fb7185', ring: 'ring-rose-400' },
+            { name: 'Cyan', border: 'border-cyan-400', bg: 'bg-cyan-500/20', text: 'text-cyan-300', dot: '#22d3ee', ring: 'ring-cyan-400' }
+        ];
+
+        const state = {
+            numVars: 4,
+            cells: new Array(16).fill('0'),
+            activeGroups: [],
+            hoveredGroupIndex: null
+        };
+
+        const GRAY_1BIT = [0, 1];
+        const GRAY_2BIT = [0, 1, 3, 2];
+
+        function getVariableNames(numVars) {
+            if (numVars === 2) return ['A', 'B'];
+            if (numVars === 3) return ['A', 'B', 'C'];
+            return ['A', 'B', 'C', 'D'];
+        }
+
+        function getGridDimensions(numVars) {
+            if (numVars === 2) {
+                return {
+                    numRows: 2,
+                    numCols: 2,
+                    rowVarName: 'A',
+                    colVarName: 'B',
+                    rowVals: GRAY_1BIT,
+                    colVals: GRAY_1BIT,
+                    rowLabels: ['0', '1'],
+                    colLabels: ['0', '1']
+                };
+            }
+            if (numVars === 3) {
+                return {
+                    numRows: 2,
+                    numCols: 4,
+                    rowVarName: 'A',
+                    colVarName: 'BC',
+                    rowVals: GRAY_1BIT,
+                    colVals: GRAY_2BIT,
+                    rowLabels: ['0', '1'],
+                    colLabels: ['00', '01', '11', '10']
+                };
+            }
+            return {
+                numRows: 4,
+                numCols: 4,
+                rowVarName: 'AB',
+                colVarName: 'CD',
+                rowVals: GRAY_2BIT,
+                colVals: GRAY_2BIT,
+                rowLabels: ['00', '01', '11', '10'],
+                colLabels: ['00', '01', '11', '10']
+            };
+        }
+
+        function getMintermIndex(r, c, numVars) {
+            const dims = getGridDimensions(numVars);
+            const rowVal = dims.rowVals[r];
+            const colVal = dims.colVals[c];
+
+            if (numVars === 2) {
+                return (rowVal << 1) | colVal;
+            }
+            if (numVars === 3) {
+                return (rowVal << 2) | colVal;
+            }
+            return (rowVal << 2) | colVal;
+        }
+
+        function generateAllValidGroups(numVars) {
+            const dims = getGridDimensions(numVars);
+            const R = dims.numRows;
+            const C = dims.numCols;
+
+            const possibleHeights = [1, 2, 4].filter(h => h <= R);
+            const possibleWidths = [1, 2, 4].filter(w => w <= C);
+
+            const validGroups = [];
+            const seenKeys = new Set();
+
+            possibleHeights.forEach(h => {
+                possibleWidths.forEach(w => {
+                    for (let r0 = 0; r0 < R; r0++) {
+                        for (let c0 = 0; c0 < C; c0++) {
+                            const minterms = [];
+                            let allZeroOrInvalid = false;
+                            let hasAtLeastOneOne = false;
+
+                            for (let i = 0; i < h; i++) {
+                                const r = (r0 + i) % R;
+                                for (let j = 0; j < w; j++) {
+                                    const c = (c0 + j) % C;
+                                    const m = getMintermIndex(r, c, numVars);
+                                    const val = state.cells[m];
+
+                                    if (val === '0') {
+                                        allZeroOrInvalid = true;
+                                        break;
+                                    }
+                                    if (val === '1') {
+                                        hasAtLeastOneOne = true;
+                                    }
+                                    minterms.push(m);
+                                }
+                                if (allZeroOrInvalid) break;
+                            }
+
+                            if (!allZeroOrInvalid && hasAtLeastOneOne) {
+                                minterms.sort((a, b) => a - b);
+                                const key = minterms.join(',');
+                                if (!seenKeys.has(key)) {
+                                    seenKeys.add(key);
+                                    validGroups.push({
+                                        r0, c0, h, w,
+                                        size: h * w,
+                                        minterms: minterms
+                                    });
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+
+            return validGroups;
+        }
+
+        function findMinimalSOP() {
+            const totalCells = 1 << state.numVars;
+            const requiredOnes = [];
+            for (let m = 0; m < totalCells; m++) {
+                if (state.cells[m] === '1') {
+                    requiredOnes.push(m);
+                }
+            }
+
+            if (requiredOnes.length === 0) {
+                return { expression: '0', groups: [] };
+            }
+
+            const validGroups = generateAllValidGroups(state.numVars);
+
+            const primeImplicants = validGroups.filter(g1 => {
+                const set1 = new Set(g1.minterms);
+                return !validGroups.some(g2 => {
+                    if (g2.size <= g1.size) return false;
+                    const set2 = new Set(g2.minterms);
+                    return g1.minterms.every(m => set2.has(m));
+                });
+            });
+
+            if (primeImplicants.some(g => g.minterms.length === totalCells)) {
+                const fullGroup = primeImplicants.find(g => g.minterms.length === totalCells);
+                return { expression: '1', groups: [fullGroup] };
+            }
+
+            let uncovered = new Set(requiredOnes);
+            const chosenGroups = [];
+            const remainingPIs = [...primeImplicants];
+
+            let changed = true;
+            while (changed && uncovered.size > 0) {
+                changed = false;
+                for (const m of Array.from(uncovered)) {
+                    const coveringPIs = remainingPIs.filter(pi => pi.minterms.includes(m));
+                    if (coveringPIs.length === 1) {
+                        const epi = coveringPIs[0];
+                        if (!chosenGroups.includes(epi)) {
+                            chosenGroups.push(epi);
+                            epi.minterms.forEach(minterm => uncovered.delete(minterm));
+                            const idx = remainingPIs.indexOf(epi);
+                            if (idx !== -1) remainingPIs.splice(idx, 1);
+                            changed = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (uncovered.size > 0) {
+                const uncoveredArr = Array.from(uncovered);
+                let bestCover = null;
+
+                function branchAndBound(currentIdx, currentUncovered, currentSelection) {
+                    if (bestCover && currentSelection.length >= bestCover.length) return;
+                    if (currentUncovered.length === 0) {
+                        if (!bestCover || currentSelection.length < bestCover.length) {
+                            bestCover = [...currentSelection];
+                        }
+                        return;
+                    }
+                    if (currentIdx >= remainingPIs.length) return;
+
+                    const targetMinterm = currentUncovered[0];
+                    const validCandidatePIs = remainingPIs.slice(currentIdx).filter(pi => pi.minterms.includes(targetMinterm));
+
+                    for (const candidate of validCandidatePIs) {
+                        const nextUncovered = currentUncovered.filter(m => !candidate.minterms.includes(m));
+                        const nextIdx = remainingPIs.indexOf(candidate) + 1;
+                        branchAndBound(nextIdx, nextUncovered, [...currentSelection, candidate]);
+                    }
+                }
+
+                branchAndBound(0, uncoveredArr, []);
+                if (bestCover) {
+                    chosenGroups.push(...bestCover);
+                }
+            }
+
+            return {
+                groups: chosenGroups,
+                expression: formatSOPExpression(chosenGroups)
+            };
+        }
+
+        function groupToTermString(group) {
+            const numVars = state.numVars;
+            const varNames = getVariableNames(numVars);
+            const minterms = group.minterms;
+
+            if (minterms.length === (1 << numVars)) {
+                return '1';
+            }
+
+            let term = '';
+            for (let v = 0; v < numVars; v++) {
+                const bitPos = numVars - 1 - v;
+                const firstBit = (minterms[0] >> bitPos) & 1;
+                const isConstant = minterms.every(m => ((m >> bitPos) & 1) === firstBit);
+
+                if (isConstant) {
+                    term += (firstBit === 1) ? varNames[v] : (varNames[v] + "'");
+                }
+            }
+
+            return term.length > 0 ? term : '1';
+        }
+
+        function formatSOPExpression(groups) {
+            if (groups.length === 0) return '0';
+            const terms = groups.map(g => groupToTermString(g));
+            if (terms.includes('1')) return '1';
+            return terms.join(' + ');
+        }
+
+        function renderKMapGrid() {
+            const container = document.getElementById('kmapContainer');
+            container.innerHTML = '';
+
+            const dims = getGridDimensions(state.numVars);
+            const R = dims.numRows;
+            const C = dims.numCols;
+
+            document.getElementById('gridTitle').textContent = `Grade do Mapa de Karnaugh (${state.numVars} Variáveis)`;
+
+            const table = document.createElement('table');
+            table.className = 'border-collapse border border-kmap-border text-center font-mono';
+
+            const headerRow = document.createElement('tr');
+            const cornerCell = document.createElement('th');
+            cornerCell.className = 'p-2 sm:p-3 border border-kmap-border bg-slate-950 text-slate-400 text-xs font-bold';
+            cornerCell.innerHTML = `
+                <div class="flex items-center justify-center gap-1 text-[11px]">
+                    <span class="text-sky-400 font-bold">${dims.rowVarName}</span>
+                    <span class="text-slate-600">\</span>
+                    <span class="text-indigo-400 font-bold">${dims.colVarName}</span>
+                </div>
+            `;
+            headerRow.appendChild(cornerCell);
+
+            dims.colLabels.forEach(label => {
+                const th = document.createElement('th');
+                th.className = 'p-2 sm:p-3 border border-kmap-border bg-slate-950 text-indigo-400 text-xs font-bold min-w-[64px] sm:min-w-[80px]';
+                th.textContent = label;
+                headerRow.appendChild(th);
+            });
+            table.appendChild(headerRow);
+
+            for (let r = 0; r < R; r++) {
+                const tr = document.createElement('tr');
+                const rowHeader = document.createElement('th');
+                rowHeader.className = 'p-2 sm:p-3 border border-kmap-border bg-slate-950 text-sky-400 text-xs font-bold min-w-[50px]';
+                rowHeader.textContent = dims.rowLabels[r];
+                tr.appendChild(rowHeader);
+
+                for (let c = 0; c < C; c++) {
+                    const m = getMintermIndex(r, c, state.numVars);
+                    const val = state.cells[m];
+
+                    const td = document.createElement('td');
+                    td.id = `kcell_${m}`;
+                    td.className = 'relative p-2 border border-kmap-border cursor-pointer transition select-none bg-kmap-card/70 hover:bg-slate-800/80';
+                    td.onclick = () => toggleCellState(m);
+
+                    const cellGroups = state.activeGroups
+                        .map((grp, idx) => ({ grp, idx }))
+                        .filter(item => item.grp.minterms.includes(m));
+
+                    let glowClass = '';
+                    let textClass = 'text-slate-400';
+                    if (val === '1') {
+                        glowClass = 'kcell-glow-1 bg-sky-950/30';
+                        textClass = 'text-sky-300 font-black';
+                    } else if (val === 'X') {
+                        glowClass = 'kcell-glow-x bg-amber-950/20';
+                        textClass = 'text-amber-300 font-black';
+                    }
+
+                    td.className += ` ${glowClass}`;
+
+                    const dotsHtml = cellGroups.map(cg => {
+                        const palette = COLOR_PALETTE[cg.idx % COLOR_PALETTE.length];
+                        return `<span class="w-2 h-2 rounded-full inline-block shadow-sm" style="background-color: ${palette.dot};" title="Grupo ${cg.idx + 1}"></span>`;
+                    }).join('');
+
+                    td.innerHTML = `
+                        <div class="flex flex-col items-center justify-between min-h-[52px] sm:min-h-[64px]">
+                            <span class="text-[10px] text-slate-400 font-normal self-start">m${m}</span>
+                            <span class="text-xl sm:text-2xl ${textClass}">${val}</span>
+                            <div class="flex gap-1 items-center justify-center h-2.5 mt-1">
+                                ${dotsHtml}
+                            </div>
+                        </div>
+                    `;
+
+                    tr.appendChild(td);
+                }
+                table.appendChild(tr);
+            }
+
+            container.appendChild(table);
+        }
+
+        function renderTruthTable() {
+            const numVars = state.numVars;
+            const totalRows = 1 << numVars;
+            const varNames = getVariableNames(numVars);
+
+            document.getElementById('truthTableSubtitle').textContent = `${totalRows} Mintermos (m0 - m${totalRows - 1})`;
+
+            const thead = document.getElementById('truthTableHead');
+            thead.innerHTML = `
+                <tr>
+                    <th class="p-2 text-center text-[10px]">m</th>
+                    ${varNames.map(v => `<th class="p-2 text-center text-xs text-slate-300 font-bold">${v}</th>`).join('')}
+                    <th class="p-2 text-center text-xs font-black text-sky-400">F</th>
+                </tr>
+            `;
+
+            const tbody = document.getElementById('truthTableBody');
+            tbody.innerHTML = '';
+
+            for (let m = 0; m < totalRows; m++) {
+                const tr = document.createElement('tr');
+                tr.id = `truthRow_${m}`;
+                tr.className = 'transition hover:bg-slate-800/60 cursor-pointer';
+
+                const bits = [];
+                for (let v = 0; v < numVars; v++) {
+                    const bitPos = numVars - 1 - v;
+                    bits.push((m >> bitPos) & 1);
+                }
+
+                const val = state.cells[m];
+                let valBadgeClass = 'bg-slate-800 text-slate-400 border border-slate-700';
+                if (val === '1') valBadgeClass = 'bg-sky-500/20 text-sky-300 border border-sky-500/40 font-black';
+                if (val === 'X') valBadgeClass = 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-black';
+
+                tr.innerHTML = `
+                    <td class="p-2 text-center text-[10px] text-slate-400">m${m}</td>
+                    ${bits.map(b => `<td class="p-2 text-center font-mono text-slate-300">${b}</td>`).join('')}
+                    <td class="p-2 text-center">
+                        <span class="inline-block px-2.5 py-0.5 rounded text-xs transition ${valBadgeClass}">
+                            ${val}
+                        </span>
+                    </td>
+                `;
+
+                tr.onclick = () => toggleCellState(m);
+                tr.onmouseenter = () => highlightMinterm(m, true);
+                tr.onmouseleave = () => highlightMinterm(m, false);
+
+                tbody.appendChild(tr);
+            }
+        }
+
+        function updateSolutionAndVisuals() {
+            const solution = findMinimalSOP();
+            state.activeGroups = solution.groups;
+
+            document.getElementById('minimizedSopExpression').textContent = `F = ${solution.expression}`;
+
+            let literalCount = 0;
+            if (solution.expression !== '0' && solution.expression !== '1') {
+                const terms = solution.expression.split(' + ');
+                terms.forEach(t => {
+                    const lettersOnly = t.replace(/'/g, '');
+                    literalCount += lettersOnly.length;
+                });
+            }
+
+            const onesCount = state.cells.filter(c => c === '1').length;
+            document.getElementById('statTermCount').textContent = (solution.expression === '0') ? '0' : solution.groups.length;
+            document.getElementById('statLiteralCount').textContent = literalCount;
+            document.getElementById('statOnesCount').textContent = onesCount;
+
+            renderGroupsLegend();
+            renderKMapGrid();
+            renderTruthTable();
+        }
+
+        function renderGroupsLegend() {
+            const container = document.getElementById('groupsLegendList');
+            container.innerHTML = '';
+
+            if (state.activeGroups.length === 0) {
+                container.innerHTML = '<span class="text-xs text-slate-400 font-mono">Nenhum grupo ativo (expressão é 0).</span>';
+                return;
+            }
+
+            state.activeGroups.forEach((grp, idx) => {
+                const palette = COLOR_PALETTE[idx % COLOR_PALETTE.length];
+                const termStr = groupToTermString(grp);
+
+                const chip = document.createElement('div');
+                chip.className = `px-2.5 py-1 rounded-xl text-xs font-mono font-bold border ${palette.border} ${palette.bg} ${palette.text} transition flex items-center gap-1.5 cursor-pointer hover:scale-105 shadow-sm`;
+                chip.innerHTML = `
+                    <span class="w-2 h-2 rounded-full inline-block" style="background-color: ${palette.dot};"></span>
+                    <span>G${idx + 1}: ${termStr}</span>
+                    <span class="text-[10px] opacity-75 font-normal">(${grp.size} células)</span>
+                `;
+
+                chip.onmouseenter = () => highlightGroupCells(grp, true);
+                chip.onmouseleave = () => highlightGroupCells(grp, false);
+
+                container.appendChild(chip);
+            });
+        }
+
+        function highlightGroupCells(group, activate) {
+            group.minterms.forEach(m => {
+                const cellEl = document.getElementById(`kcell_${m}`);
+                const rowEl = document.getElementById(`truthRow_${m}`);
+                if (cellEl) {
+                    if (activate) {
+                        cellEl.classList.add('term-highlight', 'ring-2', 'ring-white');
+                    } else {
+                        cellEl.classList.remove('term-highlight', 'ring-2', 'ring-white');
+                    }
+                }
+                if (rowEl) {
+                    if (activate) {
+                        rowEl.classList.add('bg-slate-800');
+                    } else {
+                        rowEl.classList.remove('bg-slate-800');
+                    }
+                }
+            });
+        }
+
+        function highlightMinterm(m, activate) {
+            const cellEl = document.getElementById(`kcell_${m}`);
+            if (cellEl) {
+                if (activate) {
+                    cellEl.classList.add('ring-2', 'ring-sky-400', 'bg-slate-800');
+                } else {
+                    cellEl.classList.remove('ring-2', 'ring-sky-400', 'bg-slate-800');
+                }
+            }
+        }
+
+        function toggleCellState(m) {
+            const current = state.cells[m];
+            if (current === '0') {
+                state.cells[m] = '1';
+            } else if (current === '1') {
+                state.cells[m] = 'X';
+            } else {
+                state.cells[m] = '0';
+            }
+            updateSolutionAndVisuals();
+        }
+
+        function fillAllCells(val) {
+            const total = 1 << state.numVars;
+            for (let i = 0; i < total; i++) {
+                state.cells[i] = val;
+            }
+            updateSolutionAndVisuals();
+        }
+
+        function fillRandomExample() {
+            const total = 1 << state.numVars;
+            const options = ['0', '0', '1', '1', '1', 'X'];
+            for (let i = 0; i < total; i++) {
+                state.cells[i] = options[Math.floor(Math.random() * options.length)];
+            }
+            updateSolutionAndVisuals();
+        }
+
+        function setVariableCount(num) {
+            state.numVars = num;
+            const total = 1 << num;
+            state.cells = new Array(total).fill('0');
+
+            [2, 3, 4].forEach(n => {
+                const btn = document.getElementById(`btnVar${n}`);
+                if (n === num) {
+                    btn.className = 'px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-1 bg-sky-500 text-slate-950 shadow-md';
+                } else {
+                    btn.className = 'px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-1 text-slate-300 hover:text-white';
+                }
+            });
+
+            updateSolutionAndVisuals();
+        }
+
+        function copyExpressionToClipboard() {
+            const text = document.getElementById('minimizedSopExpression').textContent;
+            const tempInput = document.createElement('input');
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            setVariableCount(4);
+            [1, 3, 7, 9, 11, 15].forEach(m => {
+                state.cells[m] = '1';
+            });
+            state.cells[5] = 'X';
+            updateSolutionAndVisuals();
+        });
+    </script>
+</body>
+</html>
