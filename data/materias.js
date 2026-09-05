@@ -4,6 +4,7 @@ export const materias = [
   {
     id: "eletronica",
     nome: "Eletrônica",
+    semestre: 4,
     cor: "sky", // sky, emerald, amber, purple, etc.
     ferramentas: [
       {
@@ -15,8 +16,9 @@ export const materias = [
     ]
   },
   {
-    id: "sistemas-digitais",
-    nome: "Sistemas Digitais",
+    id: "sistemas-digitaisI",
+    nome: "Sistemas Digitais I",
+    semestre: 2,
     cor: "purple",
     ferramentas: [
       {
