@@ -23,7 +23,7 @@ export const materias = [
         titulo: "Minimizador de K-Map",
         versao: "v1.0",
         descricao: "Mapa de Karnaugh interativo de 2 a 4 variáveis com agrupamentos toroidais e saída SOP.",
-        link: "./materias/SD I/kmap.html"
+        link: "./materias/SD_I/kmap.html"
       }
     ]
   },
@@ -36,7 +36,7 @@ export const materias = [
         titulo: "Simulador de Flip-Flops",
         versao: "v1.0",
         descricao: "Simulador interativo de flip-flops D, JK e T com diagramas de tempo e tabelas de verdade.",
-        link: "./materias/SD I/Flip_Flop.html"
+        link: "./materias/SD_I/Flip_Flop.html"
       }
     ]
   }
