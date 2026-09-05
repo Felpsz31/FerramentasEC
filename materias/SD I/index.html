@@ -84,6 +84,13 @@
 </head>
 <body class="bg-lab-base text-slate-100 min-h-screen p-3 sm:p-6 font-sans selection:bg-lab-highlight selection:text-slate-950 flex flex-col items-center">
 
+    <!-- Navegação de Retorno -->
+    <nav class="w-full max-w-6xl mb-3 flex items-center justify-start">
+        <a href="index.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-medium text-slate-400 hover:text-sky-400 hover:bg-lab-surface border border-transparent hover:border-lab-border transition">
+            ← Voltar ao Hub Principal
+        </a>
+    </nav>
+
     <!-- Topo / Cabeçalho de Controle -->
     <header class="w-full max-w-6xl mb-5 flex flex-col md:flex-row items-center justify-between gap-4 pb-4 border-b border-lab-border">
         <div>
@@ -135,10 +142,10 @@
         <!-- Grid Principal: Controles | Desenho do Circuito | Tabela Verdade -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
             
-            <!-- COLUNA ESQUERDA: CONTROLES DE ENTRADAS & CLOCK (3.5 cols) -->
+            <!-- COLUNA ESQUERDA: CONTROLES DE ENTRADAS & CLOCK -->
             <section class="lg:col-span-4 flex flex-col gap-4">
 
-                <!-- Bloco de Entradas Síncronas (Interruptores Físicos Estilizados) -->
+                <!-- Bloco de Entradas Síncronas -->
                 <div class="bg-lab-surface border border-lab-border rounded-2xl p-4 shadow-xl">
                     <div class="flex items-center justify-between mb-3 border-b border-lab-border/60 pb-2">
                         <span class="text-xs font-bold uppercase tracking-wider text-sky-400 flex items-center gap-1.5 font-mono">
@@ -202,7 +209,7 @@
                     </div>
                 </div>
 
-                <!-- Entradas Assíncronas (Preset e Clear com Lâmpadas) -->
+                <!-- Entradas Assíncronas -->
                 <div class="bg-lab-surface border border-lab-border rounded-2xl p-3.5 shadow-xl flex items-center justify-between">
                     <div>
                         <span class="text-[11px] font-bold uppercase tracking-wider text-rose-400 block font-mono">
@@ -222,7 +229,7 @@
 
             </section>
 
-            <!-- COLUNA CENTRAL: DESENHO VISUAL DO FLIP-FLOP (SCHEMATIC) (5.5 cols) -->
+            <!-- COLUNA CENTRAL: ESQUEMÁTICO DO FLIP-FLOP -->
             <section class="lg:col-span-5 bg-lab-surface border border-lab-border rounded-3xl p-4 sm:p-5 shadow-2xl flex flex-col justify-between relative overflow-hidden">
                 
                 <!-- Barra superior do display esquemático -->
@@ -238,13 +245,11 @@
                     </span>
                 </div>
 
-                <!-- ÁREA DE DESENHO VETORIAL SVG (SCHEMATIC ELETRÔNICO ULTRA-VISUAL) -->
+                <!-- ÁREA DE DESENHO SVG -->
                 <div class="relative w-full aspect-[4/3] flex items-center justify-center bg-lab-base/80 rounded-2xl border border-lab-border/80 overflow-hidden shadow-inner p-1">
                     
-                    <!-- SVG do Esquema do Flip-Flop -->
                     <svg id="schematicSvg" viewBox="0 0 540 360" class="w-full h-full select-none" xmlns="http://www.w3.org/2000/svg">
                         <defs>
-                            <!-- Filtros de Glow Neon -->
                             <filter id="glowHigh" x="-20%" y="-20%" width="140%" height="140%">
                                 <feGaussianBlur stdDeviation="3" result="blur" />
                                 <feComposite in="SourceGraphic" in2="blur" operator="over" />
@@ -260,7 +265,7 @@
                             </linearGradient>
                         </defs>
 
-                        <!-- Grade de fundo sutil de engenharia -->
+                        <!-- Grade de fundo -->
                         <g opacity="0.15">
                             <line x1="0" y1="90" x2="540" y2="90" stroke="#38bdf8" stroke-width="0.5" stroke-dasharray="2 4" />
                             <line x1="0" y1="180" x2="540" y2="180" stroke="#f59e0b" stroke-width="0.5" stroke-dasharray="2 4" />
@@ -268,16 +273,13 @@
                             <line x1="270" y1="0" x2="270" y2="360" stroke="#334155" stroke-width="0.5" stroke-dasharray="2 4" />
                         </g>
 
-                        <!-- GRUPO 1: VISTA DO SÍMBOLO EM BLOCO (DEFAULT) -->
+                        <!-- GRUPO 1: VISTA DO SÍMBOLO EM BLOCO -->
                         <g id="svgSymbolView">
                             
-                            <!-- CORPO CENTRAL DO CHIP FLIP-FLOP -->
+                            <!-- CORPO CENTRAL DO CHIP -->
                             <rect x="180" y="55" width="180" height="250" rx="16" fill="url(#chipGradient)" stroke="#2b3d63" stroke-width="2.5" />
-                            
-                            <!-- Chanfro decorativo de CI integrado -->
                             <path d="M 255 55 A 15 15 0 0 0 285 55" fill="none" stroke="#1f2e4d" stroke-width="2" />
                             
-                            <!-- Rótulos do CI -->
                             <text id="svgChipName" x="270" y="90" text-anchor="middle" fill="#38bdf8" font-family="monospace" font-size="16" font-weight="900" letter-spacing="1">
                                 FLIP-FLOP D
                             </text>
@@ -285,47 +287,42 @@
                                 DISPARO POR BORDA
                             </text>
 
-                            <!-- Núcleo Central de Estado Q Memorizado -->
+                            <!-- Núcleo Central de Estado Q -->
                             <g transform="translate(230, 130)">
                                 <rect x="0" y="0" width="80" height="75" rx="12" fill="#080d1a" stroke="#1e293b" stroke-width="2" />
                                 <text x="40" y="20" text-anchor="middle" fill="#64748b" font-family="monospace" font-size="9" font-weight="bold">ESTADO Q</text>
                                 <text id="svgCoreQVal" x="40" y="58" text-anchor="middle" fill="#10b981" font-family="monospace" font-size="36" font-weight="900">0</text>
                             </g>
 
-                            <!-- Pinos de Asynchronous Preset & Clear (Cima / Baixo) -->
-                            <!-- PRESET (Cima) -->
+                            <!-- PRESET -->
                             <line x1="270" y1="20" x2="270" y2="55" stroke="#334155" stroke-width="2.5" id="svgWirePre" />
                             <circle cx="270" cy="50" r="4.5" fill="#0e172a" stroke="#f43f5e" stroke-width="2" />
                             <text x="270" y="15" text-anchor="middle" fill="#f43f5e" font-family="monospace" font-size="10" font-weight="bold">PRE</text>
 
-                            <!-- CLEAR (Baixo) -->
+                            <!-- CLEAR -->
                             <line x1="270" y1="305" x2="270" y2="340" stroke="#334155" stroke-width="2.5" id="svgWireClr" />
                             <circle cx="270" cy="310" r="4.5" fill="#0e172a" stroke="#f43f5e" stroke-width="2" />
                             <text x="270" y="352" text-anchor="middle" fill="#f43f5e" font-family="monospace" font-size="10" font-weight="bold">CLR</text>
 
-                            <!-- ENTRADA 1 (Linha Superior: D / J / T / S) -->
+                            <!-- ENTRADA 1 -->
                             <g id="svgGroupIn1">
                                 <line id="svgWireIn1" x1="45" y1="105" x2="180" y2="105" stroke="#475569" stroke-width="3" />
-                                <!-- Badge Interativo com clique no próprio diagrama -->
                                 <rect id="svgInBadge1" x="40" y="90" width="38" height="30" rx="7" fill="#0f172a" stroke="#334155" stroke-width="2" cursor="pointer" onclick="toggleInputPin(1)" />
                                 <text id="svgInVal1" x="59" y="110" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="14" font-weight="bold" pointer-events="none">0</text>
                                 <text id="svgPinLabel1" x="195" y="110" fill="#38bdf8" font-family="monospace" font-size="14" font-weight="900">D</text>
                             </g>
 
-                            <!-- ENTRADA DE CLOCK (Linha Meio: CLK) -->
+                            <!-- ENTRADA DE CLOCK -->
                             <g id="svgGroupClk">
                                 <line id="svgWireClk" x1="45" y1="180" x2="180" y2="180" stroke="#475569" stroke-width="3" />
-                                <!-- Triângulo de Disparo Dinâmico na borda interna -->
                                 <polygon id="svgClkTriangle" points="180,170 196,180 180,190" fill="none" stroke="#f59e0b" stroke-width="2.5" />
-                                <!-- Bolha de Inversão (caso borda de descida) -->
                                 <circle id="svgClkBubble" cx="174" cy="180" r="5.5" fill="#0d1527" stroke="#f59e0b" stroke-width="2" class="hidden" />
-
                                 <rect id="svgClkBadge" x="40" y="165" width="38" height="30" rx="7" fill="#0f172a" stroke="#334155" stroke-width="2" cursor="pointer" onclick="triggerClockPulse()" />
                                 <text id="svgClkVal" x="59" y="185" text-anchor="middle" fill="#f59e0b" font-family="monospace" font-size="14" font-weight="bold" pointer-events="none">0</text>
                                 <text id="svgPinLabelClk" x="202" y="185" fill="#f59e0b" font-family="monospace" font-size="12" font-weight="bold">CLK</text>
                             </g>
 
-                            <!-- ENTRADA 2 (Linha Inferior: K / R - Oculta para D e T) -->
+                            <!-- ENTRADA 2 -->
                             <g id="svgGroupIn2">
                                 <line id="svgWireIn2" x1="45" y1="255" x2="180" y2="255" stroke="#475569" stroke-width="3" />
                                 <rect id="svgInBadge2" x="40" y="240" width="38" height="30" rx="7" fill="#0f172a" stroke="#334155" stroke-width="2" cursor="pointer" onclick="toggleInputPin(2)" />
@@ -333,24 +330,19 @@
                                 <text id="svgPinLabel2" x="195" y="260" fill="#a855f7" font-family="monospace" font-size="14" font-weight="900">K</text>
                             </g>
 
-                            <!-- SAÍDAS: Q e Q NEGADO (Direita) -->
-                            <!-- Saída Q -->
+                            <!-- SAÍDAS: Q e Q NEGADO -->
                             <g id="svgGroupOutQ">
                                 <line id="svgWireOutQ" x1="360" y1="115" x2="470" y2="115" stroke="#475569" stroke-width="3.5" />
                                 <text x="340" y="120" fill="#10b981" font-family="monospace" font-size="15" font-weight="900">Q</text>
-                                <!-- Lâmpada LED Virtual Q -->
                                 <circle id="svgLedQ" cx="485" cy="115" r="14" fill="#064e3b" stroke="#047857" stroke-width="3" />
                                 <text id="svgLedTextQ" x="485" y="120" text-anchor="middle" fill="#10b981" font-family="monospace" font-size="13" font-weight="black">0</text>
                                 <text x="485" y="145" text-anchor="middle" fill="#64748b" font-family="monospace" font-size="11" font-weight="bold">SAÍDA Q</text>
                             </g>
 
-                            <!-- Saída ~Q (Q Barrado) -->
                             <g id="svgGroupOutQBar">
                                 <line id="svgWireOutQBar" x1="360" y1="245" x2="470" y2="245" stroke="#475569" stroke-width="3.5" />
-                                <!-- Bolha de Inversão da Saída -->
                                 <circle cx="365" cy="245" r="5" fill="#0d1527" stroke="#10b981" stroke-width="2" />
                                 <text x="340" y="250" fill="#10b981" font-family="monospace" font-size="15" font-weight="900">Q&#773;</text>
-                                <!-- Lâmpada LED Virtual ~Q -->
                                 <circle id="svgLedQBar" cx="485" cy="245" r="14" fill="#10b981" stroke="#34d399" stroke-width="3" filter="url(#glowHigh)" />
                                 <text id="svgLedTextQBar" x="485" y="250" text-anchor="middle" fill="#022c22" font-family="monospace" font-size="13" font-weight="black">1</text>
                                 <text x="485" y="275" text-anchor="middle" fill="#64748b" font-family="monospace" font-size="11" font-weight="bold">SAÍDA Q&#773;</text>
@@ -358,41 +350,38 @@
 
                         </g>
 
-                        <!-- GRUPO 2: VISTA DO CIRCUITO INTERNO DE PORTAS LÓGICAS (NAND) -->
+                        <!-- GRUPO 2: VISTA DO CIRCUITO INTERNO -->
                         <g id="svgGatesView" class="hidden">
-                            <!-- Retângulo container do circuito interno -->
                             <rect x="60" y="30" width="420" height="300" rx="14" fill="#0b1222" stroke="#253556" stroke-width="2" stroke-dasharray="4 3" />
                             <text x="270" y="52" text-anchor="middle" fill="#64748b" font-family="monospace" font-size="11" font-weight="bold">ESTRUTURA INTERNA: LATCH COM ENTRADAS DE CONTROLE</text>
                             
-                            <!-- Porta NAND 1 (Superior Entrada) -->
+                            <!-- Porta NAND 1 -->
                             <path d="M 120 70 L 150 70 A 25 25 0 0 1 150 120 L 120 120 Z" fill="#162238" stroke="#38bdf8" stroke-width="2" />
                             <circle cx="178" cy="95" r="4" fill="#0d1527" stroke="#38bdf8" stroke-width="2" />
                             <text x="135" y="100" fill="#38bdf8" font-family="monospace" font-size="10" font-weight="bold">N1</text>
 
-                            <!-- Porta NAND 2 (Inferior Entrada) -->
+                            <!-- Porta NAND 2 -->
                             <path d="M 120 220 L 150 220 A 25 25 0 0 1 150 270 L 120 270 Z" fill="#162238" stroke="#38bdf8" stroke-width="2" />
                             <circle cx="178" cy="245" r="4" fill="#0d1527" stroke="#38bdf8" stroke-width="2" />
                             <text x="135" y="250" fill="#38bdf8" font-family="monospace" font-size="10" font-weight="bold">N2</text>
 
-                            <!-- Porta NAND 3 (Latch Superior Q) -->
+                            <!-- Porta NAND 3 -->
                             <path d="M 280 90 L 310 90 A 25 25 0 0 1 310 140 L 280 140 Z" fill="#162238" stroke="#10b981" stroke-width="2" />
                             <circle cx="338" cy="115" r="4" fill="#0d1527" stroke="#10b981" stroke-width="2" />
                             <text x="295" y="120" fill="#10b981" font-family="monospace" font-size="10" font-weight="bold">N3</text>
 
-                            <!-- Porta NAND 4 (Latch Inferior ~Q) -->
+                            <!-- Porta NAND 4 -->
                             <path d="M 280 200 L 310 200 A 25 25 0 0 1 310 250 L 280 250 Z" fill="#162238" stroke="#10b981" stroke-width="2" />
                             <circle cx="338" cy="225" r="4" fill="#0d1527" stroke="#10b981" stroke-width="2" />
                             <text x="295" y="230" fill="#10b981" font-family="monospace" font-size="10" font-weight="bold">N4</text>
 
-                            <!-- Fios de Realimentação Cruzada (Cross-Coupled Feedback) -->
+                            <!-- Fios Cruzados -->
                             <path d="M 342 115 L 370 115 L 370 170 L 250 170 L 250 215 L 280 215" fill="none" stroke="#10b981" stroke-width="1.8" opacity="0.8" />
                             <path d="M 342 225 L 370 225 L 370 185 L 250 185 L 250 125 L 280 125" fill="none" stroke="#10b981" stroke-width="1.8" opacity="0.8" />
 
-                            <!-- Linhas conectando N1 -> N3 e N2 -> N4 -->
                             <line x1="182" y1="95" x2="280" y2="100" stroke="#94a3b8" stroke-width="2" id="gateWireS" />
                             <line x1="182" y1="245" x2="280" y2="240" stroke="#94a3b8" stroke-width="2" id="gateWireR" />
 
-                            <!-- Saídas para os pinos finais -->
                             <line x1="342" y1="115" x2="470" y2="115" stroke="#10b981" stroke-width="3" id="gateWireOutQ" />
                             <line x1="342" y1="225" x2="470" y2="225" stroke="#10b981" stroke-width="3" id="gateWireOutQBar" />
 
@@ -426,7 +415,7 @@
 
             </section>
 
-            <!-- COLUNA DIREITA: TABELA VERDADE INTERATIVA & ANÁLISE (3 cols) -->
+            <!-- COLUNA DIREITA: TABELA VERDADE INTERATIVA & ANÁLISE -->
             <section class="lg:col-span-3 bg-lab-surface border border-lab-border rounded-2xl p-4 shadow-xl flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-2">
@@ -456,7 +445,7 @@
 
         </div>
 
-        <!-- SEÇÃO INFERIOR: OSCILOSCÓPIO / CRONOGRAMA DE FORMAS DE ONDA (TIMING DIAGRAM) -->
+        <!-- SEÇÃO INFERIOR: OSCILOSCÓPIO / CRONOGRAMA DE FORMAS DE ONDA -->
         <section class="bg-lab-surface border border-lab-border rounded-2xl p-4 sm:p-5 shadow-xl flex flex-col gap-3">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-lab-border/70 pb-3">
                 <div class="flex items-center gap-2">
@@ -488,15 +477,15 @@
 
     </main>
 
-    <!-- Rodapé -->
-    <footer class="w-full max-w-6xl mt-6 mb-4 text-center text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2 border-t border-lab-border/40 pt-4 font-mono">
-        <span>Laboratório de Circuitos Sequenciais Síncronos &bull; Flip-Flops D, JK, T e SR</span>
-        <span>Visualização Esquemática &bull; Disparo por Borda</span>
+    <!-- Rodapé Padronizado -->
+    <footer class="w-full max-w-6xl mt-8 mb-4 text-center text-xs text-slate-400 border-t border-lab-border/40 pt-4 font-mono flex flex-col items-center justify-center gap-1">
+        <div>© Programa Embaixadores Estudantis Google 2026</div>
+        <div>Felipe Gomes</div>
     </footer>
 
     <script>
         /* ============================================================
-           SINTETIZADOR DE ÁUDIO WEB (SEM ARQUIVOS EXTERNOS)
+           SINTETIZADOR DE ÁUDIO WEB
            ============================================================ */
         let audioCtx = null;
         let soundEnabled = true;
@@ -544,7 +533,7 @@
            ESTADO DA APLICAÇÃO
            ============================================================ */
         const state = {
-            ffType: 'D', // 'D', 'JK', 'T', 'SR'
+            ffType: 'D',
             inputs: {
                 D: 0,
                 J: 0,
@@ -556,15 +545,14 @@
             q: 0,
             qBar: 1,
             clk: 0,
-            triggerEdge: 'rising', // 'rising' ou 'falling'
+            triggerEdge: 'rising',
             isForbidden: false,
-            viewMode: 'symbol', // 'symbol' ou 'gates'
+            viewMode: 'symbol',
             autoTimer: null,
             speedMs: 850,
             scopeHistory: []
         };
 
-        // Definições conceituais completas de cada Flip-Flop
         const FF_SPECS = {
             D: {
                 name: 'FLIP-FLOP TIPO D',
@@ -624,7 +612,6 @@
             state.isForbidden = false;
             playSynthBeep(480, 'sine', 0.08);
 
-            // Atualiza botões superiores
             ['D', 'JK', 'T', 'SR'].forEach(t => {
                 const btn = document.getElementById(`btnTab${t}`);
                 if (t === type) {
@@ -756,7 +743,7 @@
             const pin1 = spec.pins[0];
             const pin2 = spec.pins[1] || null;
 
-            // Pino 1 (D / J / T / S)
+            // Pino 1
             const val1 = state.inputs[pin1];
             document.getElementById('svgPinLabel1').textContent = pin1;
             document.getElementById('svgInVal1').textContent = val1;
@@ -777,7 +764,7 @@
                 badge1.classList.remove('neon-glow-sky');
             }
 
-            // Pino 2 (K ou R)
+            // Pino 2
             const grpIn2 = document.getElementById('svgGroupIn2');
             const legIn2 = document.getElementById('legendIn2');
             if (pin2) {
@@ -809,11 +796,10 @@
                 legIn2.classList.add('hidden');
             }
 
-            // Atualiza rótulo da legenda do osciloscópio
             document.getElementById('legendIn1').innerHTML = `<span class="w-2.5 h-0.5 bg-sky-400 inline-block"></span> ${pin1}`;
         }
 
-        /* Atualização das Saídas Lógicas (Q e ~Q) */
+        /* Atualização das Saídas Lógicas */
         function updateOutputsView(animated = false) {
             const q = state.q;
             const qBar = state.isForbidden ? 0 : (q === 1 ? 0 : 1);
@@ -863,7 +849,7 @@
                 wireOutQ.removeAttribute('class');
             }
 
-            // Lâmpada Q Barrado (~Q)
+            // Lâmpada ~Q
             ledTextQBar.textContent = state.isForbidden ? '?' : qBar;
             if (qBar === 1 && !state.isForbidden) {
                 ledQBar.setAttribute('fill', '#10b981');
@@ -881,7 +867,6 @@
                 wireOutQBar.removeAttribute('class');
             }
 
-            // Vista de Portas Internas (NAND)
             const gateOutQ = document.getElementById('gateWireOutQ');
             const gateOutQBar = document.getElementById('gateWireOutQBar');
             if (gateOutQ && gateOutQBar) {
@@ -900,7 +885,6 @@
             let nextQ = oldQ;
             state.isForbidden = false;
 
-            // Equações lógicas de transição
             switch (state.ffType) {
                 case 'D':
                     nextQ = state.inputs.D;
@@ -939,13 +923,12 @@
             if (state.isForbidden) {
                 playSynthBeep(150, 'sawtooth', 0.25, 0.15);
             } else if (nextQ !== oldQ) {
-                playSynthBeep(880, 'sine', 0.08); // Som agudo na transição
+                playSynthBeep(880, 'sine', 0.08);
             } else {
-                playSynthBeep(440, 'triangle', 0.05); // Som suave quando mantém
+                playSynthBeep(440, 'triangle', 0.05);
             }
         }
 
-        /* Efeito de flash e propagação do sinal de Clock */
         function flashClockSignal() {
             state.clk = 1;
             const led = document.getElementById('clkStatusLed');
@@ -1020,7 +1003,7 @@
             }, 300);
         }
 
-        /* Gerador Automático de Clock (Oscilador) */
+        /* Gerador Automático de Clock */
         function toggleAutoClock() {
             const btn = document.getElementById('btnAutoClock');
             const icon = document.getElementById('autoClockIcon');
@@ -1077,7 +1060,6 @@
                 tr.id = `truthRow_${idx}`;
                 tr.className = 'transition duration-150 cursor-pointer hover:bg-lab-card/50';
                 tr.onclick = () => {
-                    // Clique na linha configura as entradas para aquela combinação!
                     spec.pins.forEach(pin => setInputVal(pin, row.inputs[pin]));
                 };
 
@@ -1138,7 +1120,7 @@
         }
 
         /* ============================================================
-           OSCILOSCÓPIO VIRTUAL (TIMING DIAGRAM NO CANVAS)
+           OSCILOSCÓPIO VIRTUAL
            ============================================================ */
         function recordScopeStep(isEdge) {
             const spec = FF_SPECS[state.ffType];
@@ -1190,16 +1172,13 @@
             const stepX = (w - 75) / (totalPoints - 1 || 1);
 
             const spec = FF_SPECS[state.ffType];
-            const hasTwoInputs = spec.pins.length > 1;
 
-            // Canais do Osciloscópio
             const tracks = [
                 { name: 'CLK', color: '#f59e0b', topY: 10, botY: 34 },
                 { name: spec.pins[0], color: '#38bdf8', topY: 44, botY: 68 },
                 { name: 'Q', color: '#10b981', topY: 80, botY: 104 }
             ];
 
-            // Rótulos e canais
             tracks.forEach(tr => {
                 ctx.fillStyle = '#64748b';
                 ctx.font = '10px monospace';
@@ -1218,7 +1197,6 @@
                 ctx.setLineDash([]);
             });
 
-            // Marcadores verticais tracejados para bordas ativas
             data.forEach((pt, i) => {
                 const x = startX + i * stepX;
                 if (pt.isEdge) {
@@ -1231,7 +1209,6 @@
                     ctx.stroke();
                     ctx.setLineDash([]);
 
-                    // Seta da borda
                     ctx.fillStyle = '#f59e0b';
                     ctx.beginPath();
                     const arrowY = state.triggerEdge === 'rising' ? tracks[0].topY - 3 : tracks[0].botY + 3;
@@ -1240,7 +1217,6 @@
                 }
             });
 
-            // Função para desenhar onda digital
             function drawDigitalWave(getter, color, topY, botY) {
                 ctx.strokeStyle = color;
                 ctx.lineWidth = 2.2;
@@ -1263,22 +1239,16 @@
                     }
                 });
                 ctx.stroke();
-                ctx.shadowBlur = 0; // reset
+                ctx.shadowBlur = 0;
             }
 
-            // 1. CLK (pulso na borda)
             drawDigitalWave(pt => pt.isEdge ? 1 : 0, tracks[0].color, tracks[0].topY, tracks[0].botY);
-
-            // 2. Entrada 1
             drawDigitalWave(pt => pt.in1, tracks[1].color, tracks[1].topY, tracks[1].botY);
-
-            // 3. Saída Q
             drawDigitalWave(pt => pt.q, tracks[2].color, tracks[2].topY, tracks[2].botY);
         }
 
         window.addEventListener('resize', drawOscilloscope);
 
-        // Inicialização
         window.addEventListener('DOMContentLoaded', () => {
             setFFType('D');
             for (let i = 0; i < 5; i++) {
