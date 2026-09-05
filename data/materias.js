@@ -3,7 +3,7 @@
 export const materias = [
   {
     id: "eletronica",
-    nome: "Eletrônica Básica",
+    nome: "Eletrônica",
     cor: "sky", // sky, emerald, amber, purple, etc.
     ferramentas: [
       {
@@ -28,8 +28,8 @@ export const materias = [
     ]
   },
   {
-    id: "flip-flops",
-    nome: "Flip-Flops",
+    id: "sistemas-digitais",
+    nome: "Sistemas Digitais",
     cor: "emerald",
     ferramentas: [
       {
